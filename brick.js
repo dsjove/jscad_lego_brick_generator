@@ -15,8 +15,8 @@ https://openjscad.org
 
 function main () {
     // Part Design
-    var unit_w = 2
-    var unit_l = 2
+    var unit_w = 3
+    var unit_l = 3
     var unit_h = 1
     
     var do_studs = true
@@ -26,13 +26,12 @@ function main () {
     // TODO: Axle holes
     // TODO: Side pin holes
     // TODO: dot form
-    // TODO: offset studs
     
     var rounded_corners = true
     var offset_studs = true
 
     var holey_studs = true
-    var holey_ceiling = false
+    var holey_ceiling = true
     var holey_clutches = false 
     
     var do_small_clutch_support = true 
@@ -162,13 +161,26 @@ function main () {
     if (holey_ceiling) {
         var w
         const hollow = cylinder({r: stud_hole/2 + stud_hole_tolerance, h: thickness, center: true})
-        for (w = 0; w < unit_w; w++) {
-            var l
-            for (l = 0; l < unit_l; l++) {
-                const x = -width/2 + unit/2 + unit*w
-                const y = -length/2 + unit/2 + unit*l
-                const z = height/2 - thickness/2
-                accume = difference(accume, hollow.translate([x, y, z]))
+        if (offset_studs == false) {
+            for (w = 0; w < unit_w; w++) {
+                var l
+                for (l = 0; l < unit_l; l++) {
+                    const x = -width/2 + unit/2 + unit*w
+                    const y = -length/2 + unit/2 + unit*l
+                    const z = height/2 - thickness/2
+                    accume = difference(accume, hollow.translate([x, y, z]))
+                }
+            }
+        }
+        else {
+            for (w = 1; w < unit_w; w++) {
+                var l
+                for (l = 1; l < unit_l; l++) {
+                    const x = -width/2 + unit*w
+                    const y = -length/2 + unit*l
+                    const z = height/2 - thickness/2
+                    accume = difference(accume, hollow.translate([x, y, z]))
+                }
             }
         }
     }
@@ -179,19 +191,33 @@ function main () {
             const bumbHollow = cylinder({r: stud_hole/2 + stud_hole_tolerance, h: studh, center: true})
             bumb = difference(bumb, bumbHollow)
         }
-        var w
-        for (w = 0; w < unit_w; w++) {
-            var l
-            for (l = 0; l < unit_l; l++) {
-                const x = -width/2 + unit/2 + unit*w
-                const y = -length/2 + unit/2 + unit*l
-                const z = height/2 + studh/2
-                accume = union(accume, bumb.translate([x, y, z]))
+        if (offset_studs == false) {
+            var w
+            for (w = 0; w < unit_w; w++) {
+                var l
+                for (l = 0; l < unit_l; l++) {
+                    const x = -width/2 + unit/2 + unit*w
+                    const y = -length/2 + unit/2 + unit*l
+                    const z = height/2 + studh/2
+                    accume = union(accume, bumb.translate([x, y, z]))
+                }
+            }
+        }
+        else {
+            var w
+            for (w = 1; w < unit_w; w++) {
+                var l
+                for (l = 1; l < unit_l; l++) {
+                    const x = -width/2 + unit*w
+                    const y = -length/2 + unit*l
+                    const z = height/2 + studh/2
+                    accume = union(accume, bumb.translate([x, y, z]))
+                }
             }
         }
     }
     
-    if (holey_clutches) {
+    if (holey_clutches && (do_studs && offset_studs) == false) {
         if (unit_w > 1 && unit_l > 1) {
             const hollow = cylinder({r: stud/2 + stud_hole_tolerance, h: thickness, center: true})
             var w 
