@@ -29,8 +29,8 @@ function main () {
     const ridge_height = 0.3
 
     // Part Design
-    var unit_w = 1
-    var unit_l = 2
+    var unit_w = 3
+    var unit_l = 1
     var unit_h = 3
     
     var do_studs = true
@@ -40,7 +40,7 @@ function main () {
 
     // TODO: Axle holes
     // TODO: Side pin holes
-    // TODO: dot form
+    // TODO: dot form (should be validation rules now)
     
     var rounded_corners = true
     var offset_studs_w = true
@@ -93,12 +93,24 @@ function main () {
         do_clutches = false
     }
 
+    if (do_clutches && unit_w == 1 && unit_l == 1) {
+        do_clutches = false
+    }
+
     if (holey_clutches && do_studs && (offset_studs_w || offset_studs_l)) {
         holey_clutches = false
     }
 
     if (holey_clutches && (unit_w == 1 || unit_l == 1) && do_clutches) {
         holey_clutches = false
+    }
+
+    if (do_small_clutch_support && unit_w > 1 && unit_l > 1) {
+        do_small_clutch_support = false
+    }
+
+    if (do_small_clutch_support && unit_w == 1 && unit_l == 1) {
+        do_small_clutch_support = false
     }
 
     if (do_small_clutch_support && unit_h <= 1) {
@@ -296,9 +308,31 @@ function main () {
                 }
             }
         }
+        else {
+            const expand_w = unit_w > 1
+            var clutch = cylinder({r: stud_hole/2 - clutch_tolerance, h: clutch_height, center: true})
+            if (do_small_clutch_support) {
+                const sw = expand_w ? clutch_support : width
+                const sh = expand_w ? length : clutch_support
+                const support = cube({size: [sw, sh, clutch_height - stud_height], center: true})
+                    .translate([0, 0, stud_height/2])
+                clutch = union(clutch, support)
+            }
+            const z = -height/2 + clutch_height/2
+            var w = expand_w ? 1 : 0
+            for (; w < unit_w; w++) {
+                var l = expand_w ? 0 : 1
+                for (; l < unit_l; l++) {
+                    const x = expand_w ? -width/2 + unit*w : 0
+                    const y = expand_w ? 0 : -length/2 + unit*l
+                    accume = union(accume, clutch.translate([x, y, z]))
+                }
+            }
+        }
+        /*
         else if (unit_w > 1) {
             var clutch = cylinder({r: stud_hole/2 - clutch_tolerance, h: clutch_height, center: true})
-            if (do_small_clutch_support && unit_h > 1) {
+            if (do_small_clutch_support) {
                 const support = cube({size: [clutch_support, length, clutch_height - stud_height], center: true})
                     .translate([0, 0, stud_height/2])
                 clutch = union(clutch, support)
@@ -313,7 +347,7 @@ function main () {
         }
         else if (unit_l > 1) {
             var clutch = cylinder({r: stud_hole/2 - clutch_tolerance, h: clutch_height, center: true})
-            if (do_small_clutch_support && unit_h > 1) {
+            if (do_small_clutch_support) {
                 const support = cube({size: [width, clutch_support, clutch_height - stud_height], center: true})
                     .translate([0, 0, stud_height/2])
                 clutch = union(clutch, support)
@@ -326,6 +360,7 @@ function main () {
                 accume = union(accume, clutch.translate([x, y, z]))
             }
         }
+        */
     }
     return accume.translate([0, 0, height/2])
 }
