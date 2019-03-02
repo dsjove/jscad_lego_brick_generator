@@ -35,7 +35,7 @@ function main () {
 
     // Part Design
     var unit_w = 3
-    var unit_l = 3
+    var unit_l = 1
     var unit_h = 1
     
     var do_studs = true
@@ -45,13 +45,14 @@ function main () {
     // TODO: Axle holes
     // TODO: Side pin holes
     // TODO: dot form
+    // TODO: no wall
     
     var rounded_corners = true
-    var offset_studs = true
+    var offset_studs = false
 
     var holey_studs = true
     var holey_ceiling = true
-    var holey_clutches = false 
+    var holey_clutches = true 
     
     var do_small_clutch_support = true 
     
@@ -74,6 +75,18 @@ function main () {
 
     if (unit_h < 0) {
         unit_h = 0
+    }
+
+    if (do_clutches && unit_h == 0) {
+        do_clutches = false
+    }
+
+    if (holey_clutches && do_studs && offset_studs) {
+        holey_clutches = false
+    }
+
+    if (holey_clutches && (unit_w == 1 || unit_l == 1) && do_clutches) {
+        holey_clutches = false
     }
 
     // Calculated
@@ -117,7 +130,7 @@ function main () {
         accume = difference(accume, ridge1, ridge2, ridge3, ridge4)
     }
   
-    if (rounded_corners ) {
+    if (rounded_corners) {
         const d1 = unit/2 - outer_tolerance
         const d2 = unit/2 - thickness
         const h = height
@@ -225,7 +238,7 @@ function main () {
         }
     }
     
-    if (holey_clutches && (do_studs && offset_studs) == false) {
+    if (holey_clutches) {
         if (unit_w > 1 && unit_l > 1) {
             const hollow = cylinder({r: stud/2 + stud_hole_tolerance, h: thickness, center: true})
             var w 
@@ -239,7 +252,7 @@ function main () {
                 }
             }
         }
-        else if (do_clutches == false) {
+        else {
             const hollow = cylinder({r: stud_hole/2 + stud_hole_tolerance, h: thickness, center: true})
             if (unit_w > 1) {
                 var w 
@@ -262,7 +275,7 @@ function main () {
         }
     }
     
-    if (do_clutches && unit_h > 0) {
+    if (do_clutches) {
         if (unit_w > 1 && unit_l > 1) {
             var clutch = cylinder({r: clutch_big_diam/2 - clutch_tolerance, h: clutch_height, center: true})
             var clutch_hollow = cylinder({r: stud/2 + stud_hole_tolerance, h: clutch_height, center: true})
