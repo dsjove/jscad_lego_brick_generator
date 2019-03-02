@@ -23,14 +23,15 @@ function main () {
     const stud = lu * 3
     const stud_height = lu * 1
     const stud_hole = lu * 2
+    
     const clutch_big_diam = 6.5
     const clutch_support = 0.4
     const ridge_width = 0.3
     const ridge_height = 0.3
 
     // Part Design
-    var unit_w = 1
-    var unit_l = 2
+    var unit_w = 2
+    var unit_l = 4
     var unit_h = 3
     
     var do_studs = true
@@ -92,6 +93,10 @@ function main () {
         do_clutches = false
     }
 
+    if (holey_ceiling && do_clutches && (unit_w == 1 || unit_l == 1) && (offset_studs_w || offset_studs_l)) {
+        holey_ceiling = false
+    }
+
     if (holey_clutches && do_studs && (offset_studs_w || offset_studs_l)) {
         holey_clutches = false
     }
@@ -114,10 +119,6 @@ function main () {
 
     if (do_small_clutch_support && do_wall == false) {
         do_small_clutch_support = false
-    }
-
-    if (holey_ceiling && do_clutches && (unit_w == 1 || unit_l == 1) && (offset_studs_w || offset_studs_l)) {
-        holey_ceiling = false
     }
 
     // Calculated
