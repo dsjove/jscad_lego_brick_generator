@@ -30,17 +30,16 @@ function main () {
 
     // Part Design
     var unit_w = 1
-    var unit_l = 3
-    var unit_h = 3
+    var unit_l = 1
+    var unit_h = 1
     
     var do_studs = true
-    var do_wall = true
-    var do_clutches = false
+    var do_wall = false
+    var do_clutches = true
     var do_ridge = true
 
     // TODO: Axle holes
     // TODO: Side pin holes
-    // TODO: dot form (should be validation rules now)
     
     var rounded_corners = true
     var offset_studs_w = false
@@ -93,15 +92,11 @@ function main () {
         do_clutches = false
     }
 
-    if (do_clutches && unit_w == 1 && unit_l == 1) {
-        do_clutches = false
-    }
-
     if (holey_clutches && do_studs && (offset_studs_w || offset_studs_l)) {
         holey_clutches = false
     }
 
-    if (holey_clutches && (unit_w == 1 || unit_l == 1) && do_clutches) {
+    if (holey_clutches && (unit_w == 1 || unit_l == 1) && do_studs) {
         holey_clutches = false
     }
 
@@ -256,7 +251,12 @@ function main () {
     }
     
     if (holey_clutches) {
-        if (unit_w > 1 && unit_l > 1) {
+        if (unit_w == 1 && unit_l == 1) {
+            const hollow = cylinder({r: stud/2 + stud_hole_tolerance, h: thickness, center: true})
+            const z = height/2 - thickness/2
+            accume = difference(accume, hollow.translate([0, 0, z]))
+        }
+        else if (unit_w > 1 && unit_l > 1) {
             const hollow = cylinder({r: stud/2 + stud_hole_tolerance, h: thickness, center: true})
             var w = 1
             for (w; w < unit_w; w++) {
@@ -286,7 +286,14 @@ function main () {
     }
     
     if (do_clutches) {
-        if (unit_w > 1 && unit_l > 1) {
+        if (unit_w == 1 && unit_l == 1) {
+            var clutch = cylinder({r: clutch_big_diam/2 - clutch_tolerance, h: clutch_height, center: true})
+            var clutch_hollow = cylinder({r: stud/2 + stud_hole_tolerance, h: clutch_height, center: true})
+            clutch = difference(clutch, clutch_hollow)
+            const z = -height/2 + clutch_height/2
+            accume = union(accume, clutch.translate([0, 0, z]))
+        }
+        else if (unit_w > 1 && unit_l > 1) {
             var clutch = cylinder({r: clutch_big_diam/2 - clutch_tolerance, h: clutch_height, center: true})
             var clutch_hollow = cylinder({r: stud/2 + stud_hole_tolerance, h: clutch_height, center: true})
             clutch = difference(clutch, clutch_hollow)
