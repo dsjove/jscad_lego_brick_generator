@@ -25,34 +25,30 @@ function main () {
     const stud_hole = lu * 2
     const clutch_big_diam = 6.5
     const clutch_support = 0.4
-    const ridge_inset = 0.3
-
-    const RidgeStyle = {
-        NONE: {w:0, h:0},
-        TILE: {w:0.3, h:0.3},
-        DOT: {w:0.3, h:0.3}
-    }
+    const ridge_width = 0.3
+    const ridge_height = 0.3
 
     // Part Design
-    var unit_w = 3
+    var unit_w = 1
     var unit_l = 2
     var unit_h = 3
     
     var do_studs = true
-    var do_wall = false
+    var do_wall = true
     var do_clutches = true
-    var do_ridge = RidgeStyle.TILE
+    var do_ridge = true
 
     // TODO: Axle holes
     // TODO: Side pin holes
     // TODO: dot form
     
     var rounded_corners = true
-    var offset_studs = false
+    var offset_studs_w = true
+    var offset_studs_l = true
 
     var holey_studs = true
     var holey_ceiling = true
-    var holey_clutches = true 
+    var holey_clutches = false 
     
     var do_small_clutch_support = true 
     
@@ -82,14 +78,22 @@ function main () {
     }
 
     if (do_wall == false) {
-        do_ridge = RidgeStyle.NONE
+        do_ridge = false
+    }
+
+    if (offset_studs_w && unit_w == 1) {
+        offset_studs_w = false
+    }
+
+    if (offset_studs_l && unit_l == 1) {
+        offset_studs_l = false
     }
 
     if (do_clutches && unit_h == 0) {
         do_clutches = false
     }
 
-    if (holey_clutches && do_studs && offset_studs) {
+    if (holey_clutches && do_studs && (offset_studs_w || offset_studs_l)) {
         holey_clutches = false
     }
 
@@ -101,6 +105,10 @@ function main () {
         do_small_clutch_support = false
     }
 
+    if (holey_ceiling && (unit_w == 1 || unit_l == 1) && (offset_studs_w || offset_studs_l)) {
+        holey_ceiling = false
+    }
+
     // Calculated
     const width = unit_w * unit
     const length = unit_l * unit
@@ -110,8 +118,6 @@ function main () {
     const clutch_height = height - thickness - stud_height_tolerance
     const actual_width = width - outer_tolerance * 2
     const actual_length = length - outer_tolerance * 2
-    const ridge_width = do_ridge.w
-    const ridge_height = do_ridge.h
 
     var accume
     
@@ -134,7 +140,7 @@ function main () {
         accume = cube({size: [actual_width, actual_length, height], center: true})
     }
     
-    if (do_ridge != RidgeStyle.NONE) {
+    if (do_ridge) {
         const z = -height/2 + ridge_height/2
         const ridge1 = cube({size: [actual_width,  ridge_width, ridge_height], center: true})
             .translate([0, -actual_length/2 + ridge_height/2, z])
@@ -180,7 +186,7 @@ function main () {
 
         accume = union(accume, i1, i2, i3, i4)
 
-        if (do_ridge != RidgeStyle.NONE) {
+        if (do_ridge) {
             const d3 = unit/2 - ridge_width-outer_tolerance
             const ridge_block = cube({size: [d1, d1, ridge_height], center: true})
                 .translate([0, 0, -height/2 + ridge_height/2])
@@ -198,28 +204,17 @@ function main () {
     }
     
     if (holey_ceiling) {
-        var w
         const hollow = cylinder({r: stud_hole/2 + stud_hole_tolerance, h: thickness, center: true})
-        if (offset_studs == false) {
-            for (w = 0; w < unit_w; w++) {
-                var l
-                for (l = 0; l < unit_l; l++) {
-                    const x = -width/2 + unit/2 + unit*w
-                    const y = -length/2 + unit/2 + unit*l
-                    const z = height/2 - thickness/2
-                    accume = difference(accume, hollow.translate([x, y, z]))
-                }
-            }
-        }
-        else {
-            for (w = 1; w < unit_w; w++) {
-                var l
-                for (l = 1; l < unit_l; l++) {
-                    const x = -width/2 + unit*w
-                    const y = -length/2 + unit*l
-                    const z = height/2 - thickness/2
-                    accume = difference(accume, hollow.translate([x, y, z]))
-                }
+        const wo = offset_studs_w ? 0 : unit/2
+        const lo = offset_studs_l ? 0 : unit/2
+        var w = offset_studs_w ? 1 :0
+        for (; w < unit_w; w++) {
+            var l = offset_studs_l ? 1 :0
+            for (; l < unit_l; l++) {
+                const x = -width/2 + wo + unit*w
+                const y = -length/2 + lo + unit*l
+                const z = height/2 - thickness/2
+                accume = difference(accume, hollow.translate([x, y, z]))
             }
         }
     }
@@ -230,28 +225,16 @@ function main () {
             const bumbHollow = cylinder({r: stud_hole/2 + stud_hole_tolerance, h: studh, center: true})
             bumb = difference(bumb, bumbHollow)
         }
-        if (offset_studs == false) {
-            var w
-            for (w = 0; w < unit_w; w++) {
-                var l
-                for (l = 0; l < unit_l; l++) {
-                    const x = -width/2 + unit/2 + unit*w
-                    const y = -length/2 + unit/2 + unit*l
-                    const z = height/2 + studh/2
-                    accume = union(accume, bumb.translate([x, y, z]))
-                }
-            }
-        }
-        else {
-            var w
-            for (w = 1; w < unit_w; w++) {
-                var l
-                for (l = 1; l < unit_l; l++) {
-                    const x = -width/2 + unit*w
-                    const y = -length/2 + unit*l
-                    const z = height/2 + studh/2
-                    accume = union(accume, bumb.translate([x, y, z]))
-                }
+        const wo = offset_studs_w ? 0 : unit/2
+        const lo = offset_studs_l ? 0 : unit/2
+        var w = offset_studs_w ? 1 :0
+        for (; w < unit_w; w++) {
+            var l = offset_studs_l ? 1 :0
+            for (l; l < unit_l; l++) {
+                const x = -width/2 + wo + unit*w
+                const y = -length/2 + lo + unit*l
+                const z = height/2 + studh/2
+                accume = union(accume, bumb.translate([x, y, z]))
             }
         }
     }
@@ -259,10 +242,10 @@ function main () {
     if (holey_clutches) {
         if (unit_w > 1 && unit_l > 1) {
             const hollow = cylinder({r: stud/2 + stud_hole_tolerance, h: thickness, center: true})
-            var w 
-            for (w = 1; w < unit_w; w++) {
-                var l
-                for (l = 1; l < unit_l; l++) {
+            var w = 1
+            for (w; w < unit_w; w++) {
+                var l = 1
+                for (; l < unit_l; l++) {
                     const x = -width/2 + unit*w
                     const y = -length/2 + unit*l
                     const z = height/2 - thickness/2
@@ -273,8 +256,8 @@ function main () {
         else {
             const hollow = cylinder({r: stud_hole/2 + stud_hole_tolerance, h: thickness, center: true})
             if (unit_w > 1) {
-                var w 
-                for (w = 1; w < unit_w; w++) {
+                var w = 1
+                for (; w < unit_w; w++) {
                     const x = -width/2 + unit*w
                     const y = 0
                     const z = height/2 - thickness/2
@@ -282,8 +265,8 @@ function main () {
                 }
             }
             else if (unit_l > 1) {
-                var l
-                for (l = 1; l < unit_l; l++) {
+                var l = 1
+                for (; l < unit_l; l++) {
                     const x = 0
                     const y = -length/2 + unit*l
                     const z = height/2 - thickness/2
@@ -298,10 +281,10 @@ function main () {
             var clutch = cylinder({r: clutch_big_diam/2 - clutch_tolerance, h: clutch_height, center: true})
             var clutch_hollow = cylinder({r: stud/2 + stud_hole_tolerance, h: clutch_height, center: true})
             clutch = difference(clutch, clutch_hollow)
-            var w 
-            for (w = 1; w < unit_w; w++) {
-                var l
-                for (l = 1; l < unit_l; l++) {
+            var w = 1
+            for (; w < unit_w; w++) {
+                var l = 1
+                for (; l < unit_l; l++) {
                     const x = -width/2 + unit*w
                     const y = -length/2 + unit*l
                     const z = -height/2 + clutch_height/2
@@ -316,8 +299,8 @@ function main () {
                     .translate([0, 0, stud_height/2])
                 clutch = union(clutch, support)
             }
-            var w
-            for (w = 1; w < unit_w; w++) {
+            var w = 1
+            for (; w < unit_w; w++) {
                 const x = -width/2 + unit*w
                 const y = 0
                 const z = -height/2 + clutch_height/2
@@ -331,8 +314,8 @@ function main () {
                     .translate([0, 0, stud_height/2])
                 clutch = union(clutch, support)
             }
-            var l 
-            for (l = 1; l < unit_l; l++) {
+            var l = 1
+            for (; l < unit_l; l++) {
                 const x = 0
                 const y = -length/2 + unit*l
                 const z = -height/2 + clutch_height/2
