@@ -16,11 +16,11 @@ https://openjscad.org
 function main () {
     // Part Design
     var unit_w = 2
-    var unit_l = 1
-    var unit_h = 0
+    var unit_l = 2
+    var unit_h = 1
     
-    var do_studs = false
-    var do_clutches = false
+    var do_studs = true
+    var do_clutches = true
     var do_ridge = false
 
     // TODO: Axle holes
@@ -29,6 +29,8 @@ function main () {
     // TODO: offset studs
     
     var rounded_corners = true
+    var offset_studs = true
+
     var holey_studs = true
     var holey_ceiling = false
     var holey_clutches = false 
@@ -237,7 +239,7 @@ function main () {
                 for (l = 1; l < unit_l; l++) {
                     const x = -width/2 + unit*w
                     const y = -length/2 + unit*l
-                    const z = -height + clutch_height/2
+                    const z = -height/2 + clutch_height/2
                     accume = union(accume, clutch.translate([x, y, z]))
                 }
             }
@@ -253,7 +255,7 @@ function main () {
             for (w = 1; w < unit_w; w++) {
                 const x = -width/2 + unit*w
                 const y = 0
-                const z = -height + clutch_height/2
+                const z = -height/2 + clutch_height/2
                 accume = union(accume, clutch.translate([x, y, z]))
             }
         }
