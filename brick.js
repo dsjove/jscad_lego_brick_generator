@@ -28,9 +28,9 @@ function main () {
     const ridge_inset = 0.3
 
     const RidgeStyle = {
-        NONE: 0,
-        TILE: 1,
-        DOT: 2
+        NONE: {w:0, h:0},
+        TILE: {w:0.3, h:0.3},
+        DOT: {w:0.3, h:0.3}
     }
 
     // Part Design
@@ -85,8 +85,8 @@ function main () {
     const clutch_height = height - thickness - stud_height_tolerance
     const actual_width = width - outer_tolerance * 2
     const actual_length = length - outer_tolerance * 2
-    const ridge_width = ridge_inset
-    const ridge_height = ridge_inset
+    const ridge_width = do_ridge.w
+    const ridge_height = do_ridge.h
 
     var accume
     
