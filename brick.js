@@ -15,23 +15,23 @@ https://openjscad.org
 
 function main () {
     // Part Design
-    var unit_w = 3
-    var unit_l = 3
-    var unit_h = 1
+    var unit_w = 2
+    var unit_l = 1
+    var unit_h = 0
     
     var do_studs = false
     var do_clutches = false
     var do_ridge = false
 
-    // TODO: unit_h == 0 is baseplate
     // TODO: Axle holes
     // TODO: Side pin holes
     // TODO: dot form
+    // TODO: offset studs
     
     var rounded_corners = true
     var holey_studs = true
-    var holey_ceiling = true
-    var holey_clutches = true 
+    var holey_ceiling = false
+    var holey_clutches = false 
     
     var do_small_clutch_support = true 
     
@@ -65,47 +65,52 @@ function main () {
         unit_l = 1
     }
 
-    if (unit_h <= 0) {
+    if (unit_h < 0) {
         unit_h = 0
     }
 
     // Calculated
-    const thickness = wall - inside_tolerance
     const width = unit_w * unit
     const length = unit_l * unit
+    const thickness = wall - inside_tolerance
     const height = unit_h > 0 ? unit_h * plate : thickness
     const studh = stud_height-stud_height_tolerance
-    const clutchh = height - thickness - stud_height_tolerance
-    const actual_width = width - outer_tolerance*2
-    const actual_length = length - outer_tolerance*2
+    const clutch_height = height - thickness - stud_height_tolerance
+    const actual_width = width - outer_tolerance * 2
+    const actual_length = length - outer_tolerance * 2
 
     var accume
     
     // Structure
-    const struct = cube({size: [actual_width, actual_length, height], center: true})
+    if (unit_h > 0) {
+        const struct = cube({size: [actual_width, actual_length, height], center: true})
         
-    const hollow = cube({size: [width-thickness*2, length-thickness*2, height-thickness], center: true})
-        .translate([0, 0, -thickness+thickness/2])
+        const hollow = cube({size: [width - thickness*2, length - thickness*2, height-thickness], center: true})
+            .translate([0, 0, -thickness + thickness/2])
             
-    accume = difference(struct, hollow)
+        accume = difference(struct, hollow)
+    }
+    else {
+        accume = cube({size: [actual_width, actual_length, height], center: true})
+    }
     
     if (do_ridge) {
-        const z = -height/2+ridge_inset/2
+        const z = -height/2 + ridge_inset/2
         const ridge1 = cube({size: [actual_width,  ridge_inset, ridge_inset], center: true})
-            .translate([0, -actual_length/2+ridge_inset/2, z])
+            .translate([0, -actual_length/2 + ridge_inset/2, z])
         const ridge2 = cube({size: [actual_width,  ridge_inset, ridge_inset], center: true})
-            .translate([0, +actual_length/2-ridge_inset/2, z])
+            .translate([0, +actual_length/2 - ridge_inset/2, z])
         const ridge3 = cube({size: [ridge_inset, actual_length, ridge_inset], center: true})
-            .translate([-actual_width/2+ridge_inset/2, 0, z])
+            .translate([-actual_width/2 + ridge_inset/2, 0, z])
         const ridge4 = cube({size: [ridge_inset, actual_length, ridge_inset], center: true})
-            .translate([+actual_width/2-ridge_inset/2, 0, z])
+            .translate([+actual_width/2 - ridge_inset/2, 0, z])
 
         accume = difference(accume, ridge1, ridge2, ridge3, ridge4)
     }
   
     if (rounded_corners ) {
-        const d1 = unit/2-outer_tolerance
-        const d2 = unit/2-thickness
+        const d1 = unit/2 - outer_tolerance
+        const d2 = unit/2 - thickness
         const h = height
         const z = 0
         const block = cube({size: [d1, d1, h], center: true})
@@ -116,8 +121,8 @@ function main () {
 
         const outer = difference(block, outer_curve)
 
-        const wo = actual_width/2-d1/2
-        const lo = actual_length/2-d1/2
+        const wo = actual_width/2 - d1/2
+        const lo = actual_length/2 - d1/2
  
         const o1 = rotate([0, 0, 0],   outer).translate([-wo, -lo, z])
         const o2 = rotate([0, 0, 90],  outer).translate([wo, -lo, z])
@@ -136,7 +141,7 @@ function main () {
         accume = union(accume, i1, i2, i3, i4)
 
         if (do_ridge) {
-            const d3 = unit/2-ridge_inset-outer_tolerance
+            const d3 = unit/2 - ridge_inset-outer_tolerance
             const ridge_block = cube({size: [d1, d1, ridge_inset], center: true})
                 .translate([0, 0, -height/2 + ridge_inset/2])
             const ridge_curve = cylinder({r: d3, h: ridge_inset, center: true})
@@ -154,7 +159,7 @@ function main () {
     
     if (holey_ceiling) {
         var w
-        const hollow = cylinder({r: stud_hole/2+stud_hole_tolerance, h: thickness, center: true})
+        const hollow = cylinder({r: stud_hole/2 + stud_hole_tolerance, h: thickness, center: true})
         for (w = 0; w < unit_w; w++) {
             var l
             for (l = 0; l < unit_l; l++) {
@@ -169,7 +174,7 @@ function main () {
     if (do_studs) {
         var bumb = cylinder({r: stud/2-stud_tolerance, h: studh, center: true})
         if (holey_studs) {
-            const bumbHollow = cylinder({r: stud_hole/2+stud_hole_tolerance, h: studh, center: true})
+            const bumbHollow = cylinder({r: stud_hole/2 + stud_hole_tolerance, h: studh, center: true})
             bumb = difference(bumb, bumbHollow)
         }
         var w
@@ -186,7 +191,7 @@ function main () {
     
     if (holey_clutches) {
         if (unit_w > 1 && unit_l > 1) {
-            const hollow = cylinder({r: stud/2+stud_hole_tolerance, h: thickness, center: true})
+            const hollow = cylinder({r: stud/2 + stud_hole_tolerance, h: thickness, center: true})
             var w 
             for (w = 1; w < unit_w; w++) {
                 var l
@@ -199,7 +204,7 @@ function main () {
             }
         }
         else if (do_clutches == false) {
-            const hollow = cylinder({r: stud_hole/2+stud_hole_tolerance, h: thickness, center: true})
+            const hollow = cylinder({r: stud_hole/2 + stud_hole_tolerance, h: thickness, center: true})
             if (unit_w > 1) {
                 var w 
                 for (w = 1; w < unit_w; w++) {
@@ -223,8 +228,8 @@ function main () {
     
     if (do_clutches && unit_h > 0) {
         if (unit_w > 1 && unit_l > 1) {
-            var clutch = cylinder({r: clutch_big_diam/2-clutch_tolerance, h: clutchh, center: true})
-            var clutch_hollow = cylinder({r: stud/2+stud_hole_tolerance, h: clutchh, center: true})
+            var clutch = cylinder({r: clutch_big_diam/2 - clutch_tolerance, h: clutch_height, center: true})
+            var clutch_hollow = cylinder({r: stud/2 + stud_hole_tolerance, h: clutch_height, center: true})
             clutch = difference(clutch, clutch_hollow)
             var w 
             for (w = 1; w < unit_w; w++) {
@@ -232,15 +237,15 @@ function main () {
                 for (l = 1; l < unit_l; l++) {
                     const x = -width/2 + unit*w
                     const y = -length/2 + unit*l
-                    const z = -(height-clutchh)/2
+                    const z = -height + clutch_height/2
                     accume = union(accume, clutch.translate([x, y, z]))
                 }
             }
         }
         else if (unit_w > 1) {
-            var clutch = cylinder({r: stud_hole/2-clutch_tolerance, h: clutchh, center: true})
+            var clutch = cylinder({r: stud_hole/2 - clutch_tolerance, h: clutch_height, center: true})
             if (do_small_clutch_support && unit_h > 1) {
-                const support = cube({size: [clutch_support, length, clutchh-stud_height], center: true})
+                const support = cube({size: [clutch_support, length, clutch_height - stud_height], center: true})
                     .translate([0, 0, stud_height/2])
                 clutch = union(clutch, support)
             }
@@ -248,14 +253,14 @@ function main () {
             for (w = 1; w < unit_w; w++) {
                 const x = -width/2 + unit*w
                 const y = 0
-                const z = -(height-clutchh)/2
+                const z = -height + clutch_height/2
                 accume = union(accume, clutch.translate([x, y, z]))
             }
         }
         else if (unit_l > 1) {
-            var clutch = cylinder({r: stud_hole/2-clutch_tolerance, h: clutchh, center: true})
+            var clutch = cylinder({r: stud_hole/2 - clutch_tolerance, h: clutch_height, center: true})
             if (do_small_clutch_support && unit_h > 1) {
-                const support = cube({size: [width, clutch_support, clutchh-stud_height], center: true})
+                const support = cube({size: [width, clutch_support, clutch_height - stud_height], center: true})
                     .translate([0, 0, stud_height/2])
                 clutch = union(clutch, support)
             }
@@ -263,7 +268,7 @@ function main () {
             for (l = 1; l < unit_l; l++) {
                 const x = 0
                 const y = -length/2 + unit*l
-                const z = -(height-clutchh)/2
+                const z = -height/2 + clutch_height/2
                 accume = union(accume, clutch.translate([x, y, z]))
             }
         }
