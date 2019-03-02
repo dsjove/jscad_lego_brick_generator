@@ -35,17 +35,17 @@ function main () {
 
     // Part Design
     var unit_w = 3
-    var unit_l = 1
-    var unit_h = 1
+    var unit_l = 2
+    var unit_h = 3
     
     var do_studs = true
+    var do_wall = false
     var do_clutches = true
     var do_ridge = RidgeStyle.TILE
 
     // TODO: Axle holes
     // TODO: Side pin holes
     // TODO: dot form
-    // TODO: no wall
     
     var rounded_corners = true
     var offset_studs = false
@@ -77,6 +77,14 @@ function main () {
         unit_h = 0
     }
 
+    if (unit_h == 0) {
+        do_wall = false
+    }
+
+    if (do_wall == false) {
+        do_ridge = RidgeStyle.NONE
+    }
+
     if (do_clutches && unit_h == 0) {
         do_clutches = false
     }
@@ -87,6 +95,10 @@ function main () {
 
     if (holey_clutches && (unit_w == 1 || unit_l == 1) && do_clutches) {
         holey_clutches = false
+    }
+
+    if (do_small_clutch_support && do_wall == false) {
+        do_small_clutch_support = false
     }
 
     // Calculated
@@ -105,12 +117,18 @@ function main () {
     
     // Structure
     if (unit_h > 0) {
-        const struct = cube({size: [actual_width, actual_length, height], center: true})
-        
-        const hollow = cube({size: [width - thickness*2, length - thickness*2, height-thickness], center: true})
-            .translate([0, 0, -thickness + thickness/2])
+        if (do_wall) {
+            const struct = cube({size: [actual_width, actual_length, height], center: true})
             
-        accume = difference(struct, hollow)
+            const hollow = cube({size: [width - thickness*2, length - thickness*2, height-thickness], center: true})
+                .translate([0, 0, -thickness + thickness/2])
+                
+            accume = difference(struct, hollow)
+        }
+        else {
+            accume = cube({size: [actual_width, actual_length, thickness], center: true})
+                .translate([0, 0, height/2 - thickness/2])
+        }
     }
     else {
         accume = cube({size: [actual_width, actual_length, height], center: true})
@@ -133,8 +151,8 @@ function main () {
     if (rounded_corners) {
         const d1 = unit/2 - outer_tolerance
         const d2 = unit/2 - thickness
-        const h = height
-        const z = 0
+        const h = do_wall ? height : thickness
+        const z = do_wall ? 0 : height/2 - thickness/2
         const block = cube({size: [d1, d1, h], center: true})
         const outer_curve = cylinder({r: d1, h: h, center: true})
              .translate([d1/2, d1/2, 0])
