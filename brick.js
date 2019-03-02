@@ -101,11 +101,15 @@ function main () {
         holey_clutches = false
     }
 
+    if (do_small_clutch_support && unit_h <= 1) {
+        do_small_clutch_support = false
+    }
+
     if (do_small_clutch_support && do_wall == false) {
         do_small_clutch_support = false
     }
 
-    if (holey_ceiling && (unit_w == 1 || unit_l == 1) && (offset_studs_w || offset_studs_l)) {
+    if (holey_ceiling && do_clutches && (unit_w == 1 || unit_l == 1) && (offset_studs_w || offset_studs_l)) {
         holey_ceiling = false
     }
 
