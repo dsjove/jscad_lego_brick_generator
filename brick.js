@@ -29,13 +29,13 @@ function main () {
     const ridge_height = 0.3
 
     // Part Design
-    var unit_w = 3
-    var unit_l = 1
+    var unit_w = 1
+    var unit_l = 3
     var unit_h = 3
     
     var do_studs = true
     var do_wall = true
-    var do_clutches = true
+    var do_clutches = false
     var do_ridge = true
 
     // TODO: Axle holes
@@ -43,12 +43,12 @@ function main () {
     // TODO: dot form (should be validation rules now)
     
     var rounded_corners = true
-    var offset_studs_w = true
-    var offset_studs_l = true
+    var offset_studs_w = false
+    var offset_studs_l = false
 
     var holey_studs = true
     var holey_ceiling = true
-    var holey_clutches = false 
+    var holey_clutches = true 
     
     var do_small_clutch_support = true 
     
@@ -270,22 +270,15 @@ function main () {
             }
         }
         else {
+            const expand_w = unit_w > 1
+            const z = height/2 - thickness/2
             const hollow = cylinder({r: stud_hole/2 + stud_hole_tolerance, h: thickness, center: true})
-            if (unit_w > 1) {
-                var w = 1
-                for (; w < unit_w; w++) {
-                    const x = -width/2 + unit*w
-                    const y = 0
-                    const z = height/2 - thickness/2
-                    accume = difference(accume, hollow.translate([x, y, z]))
-                }
-            }
-            else if (unit_l > 1) {
-                var l = 1
+            var w = expand_w ? 1 : 0
+            for (; w < unit_w; w++) {
+                var l = expand_w ? 0 : 1
                 for (; l < unit_l; l++) {
-                    const x = 0
-                    const y = -length/2 + unit*l
-                    const z = height/2 - thickness/2
+                    const x = expand_w ? -width/2 + unit*w : 0
+                    const y = expand_w ? 0 : -length/2 + unit*l
                     accume = difference(accume, hollow.translate([x, y, z]))
                 }
             }
@@ -329,38 +322,6 @@ function main () {
                 }
             }
         }
-        /*
-        else if (unit_w > 1) {
-            var clutch = cylinder({r: stud_hole/2 - clutch_tolerance, h: clutch_height, center: true})
-            if (do_small_clutch_support) {
-                const support = cube({size: [clutch_support, length, clutch_height - stud_height], center: true})
-                    .translate([0, 0, stud_height/2])
-                clutch = union(clutch, support)
-            }
-            var w = 1
-            for (; w < unit_w; w++) {
-                const x = -width/2 + unit*w
-                const y = 0
-                const z = -height/2 + clutch_height/2
-                accume = union(accume, clutch.translate([x, y, z]))
-            }
-        }
-        else if (unit_l > 1) {
-            var clutch = cylinder({r: stud_hole/2 - clutch_tolerance, h: clutch_height, center: true})
-            if (do_small_clutch_support) {
-                const support = cube({size: [width, clutch_support, clutch_height - stud_height], center: true})
-                    .translate([0, 0, stud_height/2])
-                clutch = union(clutch, support)
-            }
-            var l = 1
-            for (; l < unit_l; l++) {
-                const x = 0
-                const y = -length/2 + unit*l
-                const z = -height/2 + clutch_height/2
-                accume = union(accume, clutch.translate([x, y, z]))
-            }
-        }
-        */
     }
     return accume.translate([0, 0, height/2])
 }
