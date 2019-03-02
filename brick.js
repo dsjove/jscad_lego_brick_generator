@@ -27,6 +27,12 @@ function main () {
     const clutch_support = 0.4
     const ridge_inset = 0.3
 
+    const RidgeStyle = {
+        NONE: 0,
+        TILE: 1,
+        DOT: 2
+    }
+
     // Part Design
     var unit_w = 3
     var unit_l = 3
@@ -34,7 +40,7 @@ function main () {
     
     var do_studs = true
     var do_clutches = true
-    var do_ridge = true
+    var do_ridge = RidgeStyle.TILE
 
     // TODO: Axle holes
     // TODO: Side pin holes
@@ -97,7 +103,7 @@ function main () {
         accume = cube({size: [actual_width, actual_length, height], center: true})
     }
     
-    if (do_ridge) {
+    if (do_ridge != RidgeStyle.NONE) {
         const z = -height/2 + ridge_height/2
         const ridge1 = cube({size: [actual_width,  ridge_width, ridge_height], center: true})
             .translate([0, -actual_length/2 + ridge_height/2, z])
@@ -143,7 +149,7 @@ function main () {
 
         accume = union(accume, i1, i2, i3, i4)
 
-        if (do_ridge) {
+        if (do_ridge != RidgeStyle.NONE) {
             const d3 = unit/2 - ridge_width-outer_tolerance
             const ridge_block = cube({size: [d1, d1, ridge_height], center: true})
                 .translate([0, 0, -height/2 + ridge_height/2])
