@@ -30,24 +30,24 @@ function main () {
 
     // Part Design
     var unit_w = 1
-    var unit_l = 1
-    var unit_h = 1
+    var unit_l = 2
+    var unit_h = 3
     
     var do_studs = true
-    var do_wall = false
+    var do_wall = true
     var do_clutches = true
-    var do_ridge = true
+    var do_ridge = false
 
-    // TODO: Axle holes
-    // TODO: Side pin holes
+    // TODO: Side axle holes
+    // TODO: Side studs
     
-    var rounded_corners = true
+    var rounded_corners = false
     var offset_studs_w = false
     var offset_studs_l = false
 
-    var holey_studs = true
+    var holey_studs = false
     var holey_ceiling = true
-    var holey_clutches = true 
+    var holey_clutches = false 
     
     var do_small_clutch_support = true 
     
